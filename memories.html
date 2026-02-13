@@ -225,29 +225,31 @@ canvas {
     function showMemory(){
 
 if(index >= memories.length){
-    card.style.display="none";
-    document.getElementById("finalCard").style.display="flex";
-    document.getElementById("finalCard").classList.add("active");
+    card.style.display = "none";
+    const finalCard = document.getElementById("finalCard");
+    finalCard.style.display = "flex";
+    finalCard.classList.add("active");
     startFireworks();
     return;
 }
 
 const current = memories[index];
 
-imageElement.src = current.img + "?v=" + Date.now(); // prevent cache
+// WAIT for image to load before typing
+imageElement.onload = function(){
 
-card.classList.remove("active");
-setTimeout(()=> card.classList.add("active"),200);
+    card.classList.remove("active");
+    setTimeout(()=> card.classList.add("active"), 200);
 
-let typingDuration = 3500;
-let speed = typingDuration / current.text.length;
+    typeWriter(current.text, 50);
 
-typeWriter(current.text, speed);
+    setTimeout(()=>{
+        index++;
+        showMemory();
+    }, 5000);
+};
 
-index++;
-
-// 🔥 Call next slide only AFTER full display time
-setTimeout(showMemory, typingDuration + 1500);
+imageElement.src = current.img; // ❌ REMOVE cache breaker
 }
     window.addEventListener("load", function(){
         showMemory();
@@ -284,7 +286,7 @@ setTimeout(showMemory, typingDuration + 1500);
         letter.style.display = "block";
     
         const message = `
-    My Love Divya ❤️,
+    My Dear Divya ❤️,
     
     From the day you walked into my life,
     everything became brighter.
@@ -330,4 +332,3 @@ setTimeout(showMemory, typingDuration + 1500);
     </script>
 </body>
 </html>
-
