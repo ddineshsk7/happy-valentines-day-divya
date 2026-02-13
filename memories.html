@@ -188,15 +188,15 @@ canvas {
     
     /* Memories */
     const memories = [
-    { img:"photo1.jpg", text:"My cute innocent girl ❤️" },
-    { img:"photo2.jpg", text:"The day we could not stop laughing 😂" },
-    { img:"photo3.jpeg", text:"First gift for my world 💑" },
-    { img:"photo4.jpeg", text:"Our first trip memory ☕💕" },
-    { img:"photo5.jpg", text:"The day changed my life 😍" },
-    { img:"photo6.jpeg", text:"One of my favorite days with you 💖" },
-    { img:"photo7.jpg", text:"Best companion of my life 😊" },
-    { img:"photo8.jpg", text:"Forever my favorite person 💕" },
-    { img:"photo9.jpg", text:"And this is just the beginning of our story 💍" }
+    { img:"images/photo1.jpg", text:"My cute innocent girl ❤️" },
+    { img:"images/photo2.jpg", text:"The day we could not stop laughing 😂" },
+    { img:"images/photo3.jpeg", text:"First gift for my world 💑" },
+    { img:"images/photo4.jpeg", text:"Our first trip memory ☕💕" },
+    { img:"images/photo5.jpg", text:"The day changed my life 😍" },
+    { img:"images/photo6.jpeg", text:"One of my favorite days with you 💖" },
+    { img:"images/photo7.jpg", text:"Best companion of my life 😊" },
+    { img:"images/photo8.jpg", text:"Forever my favorite person 💕" },
+    { img:"images/photo9.jpg", text:"And this is just the beginning of our story 💍" }
     ];
     
     let index = 0;
@@ -223,33 +223,35 @@ canvas {
     
     /* Slideshow */
     function showMemory(){
-    
-        if(index >= memories.length){
-            clearInterval(slideshowInterval);
-            card.style.display="none";
-            document.getElementById("finalCard").style.display="flex";
-            document.getElementById("finalCard").classList.add("active");
-            startFireworks();
-            return;
-        }
-    
-        const current = memories[index];
-    
-        imageElement.src = current.img;
-        card.classList.remove("active");
-        setTimeout(()=> card.classList.add("active"),200);
-    
-        let typingDuration = 3500;
-        let speed = typingDuration / current.text.length;
-    
-        typeWriter(current.text, speed);
-    
-        index++;
-    }
-    
+
+if(index >= memories.length){
+    card.style.display="none";
+    document.getElementById("finalCard").style.display="flex";
+    document.getElementById("finalCard").classList.add("active");
+    startFireworks();
+    return;
+}
+
+const current = memories[index];
+
+imageElement.src = current.img + "?v=" + Date.now(); // prevent cache
+
+card.classList.remove("active");
+setTimeout(()=> card.classList.add("active"),200);
+
+let typingDuration = 3500;
+let speed = typingDuration / current.text.length;
+
+typeWriter(current.text, speed);
+
+index++;
+
+// 🔥 Call next slide only AFTER full display time
+setTimeout(showMemory, typingDuration + 1500);
+}
     window.addEventListener("load", function(){
         showMemory();
-        slideshowInterval = setInterval(showMemory, displayTime);
+        
     });
     
     /* Fireworks */
@@ -328,4 +330,3 @@ canvas {
     </script>
 </body>
 </html>
-
