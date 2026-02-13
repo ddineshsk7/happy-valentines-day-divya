@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Beautiful Memories 💕</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at top, #ff9a9e, #fad0c4);
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Floating hearts */
+.floating-heart {
+    position: absolute;
+    color: rgba(255,255,255,0.5);
+    animation: floatUp linear infinite;
+    pointer-events: none;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(100vh); opacity:0; }
+    30% { opacity:1; }
+    100% { transform: translateY(-10vh); opacity:0; }
+}
+
+/* Falling petals */
+.petal {
+    position: absolute;
+    color: pink;
+    animation: fall linear infinite;
+    pointer-events: none;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg); }
+    100% { transform: translateY(110vh) rotate(360deg); }
+}
+
+.memory-card {
+    width: auto;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+    transform: scale(0.8);
+    opacity: 0;
+    transition: all 1s ease;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.memory-card.active {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.memory-card img {
+    width: auto;
+    height: auto;
+    max-width: 90vw;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+    margin: auto;
+}
+
+.caption {
+    padding: 20px;
+    font-size: 18px;
+    color: #ff4b5c;
+    text-align: center;
+    min-height: 60px;
+    border-right: 2px solid #ff4b5c;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
+
+.caption.typing {
+    animation: blink 1s infinite;
+}
+
+.final-message {
+    position: absolute;
+    color: white;
+    font-size: 40px;
+    text-align: center;
+    display: none;
+    z-index: 3;
+}
+
+canvas {
+    position: absolute;
+    top:0;
+    left:0;
+    z-index:1;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" loop>
+<source src="Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video).mp3" type="audio/mp3">
+</audio>
+
+<div class="memory-card" id="card">
+    <img id="memoryImage" src="photo1.jpg">
+    <div class="caption" id="caption"></div>
+</div>
+<div class="memory-card" id="finalCard" style="display:none; text-align:center; padding:30px;">
+
+    <h2 style="color:#ff4b5c;">If the world was ending… 🌍</h2>
+    <p style="font-size:20px; margin-bottom:30px;">
+        I’d wanna be next to you ❤️
+    </p>
+
+    <button id="openLetterBtn" 
+        style="padding:12px 25px;
+               font-size:18px;
+               border:none;
+               border-radius:30px;
+               background:#ff4b5c;
+               color:white;
+               cursor:pointer;">
+        📩 See This Babe
+    </button>
+
+    <div id="letterContent" 
+         style="display:none; margin-top:30px; text-align:left; 
+                font-size:18px; color:#444; line-height:1.6;">
+    </div>
+
+</div>
+
+<canvas id="fireworks"></canvas>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+
+if (params.get("play") === "true") {
+    window.addEventListener("load", function () {
+        const music = document.getElementById("bgMusic");
+        music.play().catch(() => {});
+    });
+}
+/* Floating hearts */
+for (let i = 0; i < 20; i++) {
+    let heart = document.createElement("div");
+    heart.innerHTML = "❤";
+    heart.className = "floating-heart";
+    heart.style.left = Math.random()*100+"vw";
+    heart.style.fontSize = (10+Math.random()*30)+"px";
+    heart.style.animationDuration = (6+Math.random()*5)+"s";
+    document.body.appendChild(heart);
+}
+
+/* Falling petals */
+for (let i = 0; i < 20; i++) {
+    let petal = document.createElement("div");
+    petal.innerHTML = "🌸";
+    petal.className = "petal";
+    petal.style.left = Math.random()*100+"vw";
+    petal.style.animationDuration = (8+Math.random()*6)+"s";
+    document.body.appendChild(petal);
+}
+
+const memories = [
+{ img:"images/photo1.jpg", text:"The cute innocent girl ❤️" },
+{ img:"images/photo2.jpg", text:"The day we couldn’t stop laughing 😂" },
+{ img:"images/photo3.jpeg", text:"The first gift for my world 💑" },
+{ img:"images/photo4.jpeg", text:"Our first trip memory ☕💕" },
+{ img:"images/photo5.jpg", text:"The day changed my life 😍" },
+{ img:"images/photo6.jpeg", text:"One of my favorite days with you 💖" },
+{ img:"images/photo7.jpg", text:"Best companion of my life 😊" },
+{ img:"images/photo8.jpg", text:"Forever my favorite person 💕" },
+{ img:"images/photo9.jpg", text:"And this is just the beginning of our story 💍" }
+];
+
+let index = 0;
+const imageElement = document.getElementById("memoryImage");
+const captionElement = document.getElementById("caption");
+const card = document.getElementById("card");
+
+function typeWriter(text, i=0){
+    if(i < text.length){
+        captionElement.innerHTML += text.charAt(i);
+        setTimeout(()=>typeWriter(text,i+1),40);
+    }
+}
+
+function showMemory(){
+
+    if(index === memories.length){
+    card.style.display="none";
+    document.getElementById("finalCard").style.display="flex";
+    document.getElementById("finalCard").classList.add("active");
+    startFireworks();
+    return;
+}
+
+
+    captionElement.innerHTML="";
+    imageElement.src=memories[index].img;
+
+    card.classList.remove("active");
+    setTimeout(()=>card.classList.add("active"),200);
+
+    typeWriter(memories[index].text);
+    index++;
+}
+
+showMemory();
+setInterval(showMemory,5000);
+
+
+/* Fireworks */
+function startFireworks(){
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+function firework(){
+    let x=Math.random()*canvas.width;
+    let y=Math.random()*canvas.height/2;
+    for(let i=0;i<30;i++){
+        ctx.beginPath();
+        ctx.arc(x,y,2,0,Math.PI*2);
+        ctx.fillStyle="hsl("+Math.random()*360+",100%,60%)";
+        ctx.fill();
+    }
+}
+setInterval(firework,500);
+}
+
+const openBtn = document.getElementById("openLetterBtn");
+const letter = document.getElementById("letterContent");
+
+openBtn.addEventListener("click", function(){
+
+    openBtn.style.display = "none";
+    letter.style.display = "block";
+
+    const message = `
+My Love Divya ❤️,
+
+From the day you walked into my life,
+everything became brighter.
+
+You are my peace,
+my happiness,
+my safe place,
+and my biggest blessing.
+
+If the world was ending,
+I wouldn’t need anything else...
+as long as I am next to you.
+
+Every memory with you
+is my favorite memory.
+
+I promise to stand by you,
+laugh with you,
+support you,
+and love you endlessly.
+
+Happy Valentine’s Day Divya ❤️
+Forever Yours 💕
+`;
+
+    typeLetter(message);
+});
+
+function typeLetter(text, i=0){
+    if(i < text.length){
+        letter.innerHTML += text.charAt(i);
+        setTimeout(()=>typeLetter(text, i+1),30);
+    }
+}
+
+
+</script>
+
+
+
+</body>
+</html>
